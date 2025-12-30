@@ -37,32 +37,8 @@ class MusicLibraryManager: ObservableObject {
         loadSavedData()
     }
     
-    // MARK: - Scan Music Directory
-    private func scanMusicDirectory() {
-        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
-        
-        let musicDirectory = documentsURL.appendingPathComponent("Music", isDirectory: true)
-        
-        // Create directory if it doesn't exist
-        if !fileManager.fileExists(atPath: musicDirectory.path) {
-            try? fileManager.createDirectory(at: musicDirectory, withIntermediateDirectories: true)
-            return
-        }
-        
-        // Scan for MP3 files
-        guard let files = try? fileManager.contentsOfDirectory(at: musicDirectory, includingPropertiesForKeys: nil) else { return }
-        
-        let mp3Files = files.filter { $0.pathExtension.lowercased() == "mp3" }
-        
-        for fileURL in mp3Files {
-            // Add if not already in library
-            if !songs.contains(where: { $0.url == fileURL }) {
-                if let song = Song.fromURL(fileURL) {
-                    songs.append(song)
-                }
-            }
-        }
-    }
+// Consolidated scanning logic now handled in loadSavedData() and scanMusicDirectoryAsync()
+
     
     // MARK: - File Scanning
     func scanDirectory(_ url: URL) {
@@ -296,11 +272,7 @@ class MusicLibraryManager: ObservableObject {
         }
     }
     
-    // MARK: - Helper
-    func loadMusicFiles() {
-        scanMusicDirectory()
-        organizeLibrary()
-    }
+
 
     // MARK: - Persistence
     private func saveSongs() {
