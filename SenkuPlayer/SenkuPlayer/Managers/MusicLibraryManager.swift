@@ -267,7 +267,7 @@ class MusicLibraryManager: ObservableObject {
     }
     
     func getSongsForPlaylist(_ playlist: Playlist) -> [Song] {
-        return playlist.songIDs.compactMap { songID in
+        return playlist.songIDs.compactMap { (songID: UUID) -> Song? in
             songs.first { $0.id == songID }
         }
     }

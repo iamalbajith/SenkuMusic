@@ -27,7 +27,7 @@ struct Album: Identifiable, Hashable {
     }
     
     var year: Int? {
-        songs.compactMap { $0.year }.first
+        songs.compactMap { (song: Song) -> Int? in song.year }.first
     }
     
     func hash(into hasher: inout Hasher) {
