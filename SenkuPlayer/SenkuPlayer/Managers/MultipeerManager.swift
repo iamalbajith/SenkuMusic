@@ -144,8 +144,8 @@ extension MultipeerManager: MCSessionDelegate {
                 self.lastReceivedSongName = resourceName.replacingOccurrences(of: ".mp3", with: "", options: .caseInsensitive)
                 self.showReceivedNotification = true
                 
-                // Refresh library
-                MusicLibraryManager.shared.loadMusicFiles()
+                // Refresh library using the new async scan logic
+                MusicLibraryManager.shared.loadSavedData()
                 
             } catch {
                 print("Error saving received file: \(error.localizedDescription)")
