@@ -131,7 +131,13 @@ extension Song {
             }
         }
         
+        // Generate a stable ID based on the URL path
+        // Since the Documents directory path can change on iOS, we use the relative path or filename
+        let stableString = url.lastPathComponent
+        let id = UUID(uuidString: stableString.padTo32()) ?? UUID()
+        
         return Song(
+            id: id,
             url: url,
             title: title,
             artist: artist,
@@ -144,5 +150,44 @@ extension Song {
             trackNumber: trackNumber,
             discNumber: discNumber
         )
+    }
+}
+
+private extension String {
+    func padTo32() -> String {
+        let hash = self.hashString()
+        // Format as UUID: 8-4-4-4-12
+        let h = hash.padding(toLength: 32, withPad: "0", startingAt: 0)
+        let i = h.index(h.startIndex, offsetBy: 8)
+        let j = h.index(i, offsetBy: 4)
+        let k = h.index(j, offsetBy: 4)
+        let l = h.index(k, offsetBy: 4)
+        
+        return "\(h[..<i])-\(h[i..<j])-\(h[j..<k])-\(h[k..<l])-\(h[l...])"
+    }
+    
+    func hashString() -> String {
+        let data = Data(self.utf8)
+        var hash = ""
+        // Simple hash to get a hex string
+        var h: UInt64 = 5381
+        for byte in data {
+            h = ((h << 5) &+ h) &+ UInt64(byte)
+        }
+        // Let's use a bit more robust hex representation
+        return String(format: "%016llx%016llx", h, h.reversed())
+    }
+}
+
+private extension UInt64 {
+    func reversed() -> UInt64 {
+        var v = self
+        v = ((v >> 1) & 0x5555555555555555) | ((v & 0x5555555555555555) << 1)
+        v = ((v >> 2) & 0x3333333333333333) | ((v & 0x3333333333333333) << 2)
+        v = ((v >> 4) & 0x0F0F0F0F0F0F0F0F) | ((v & 0x0F0F0F0F0F0F0F0F) << 4)
+        v = ((v >> 8) & 0x00FF00FF00FF00FF) | ((v & 0x00FF00FF00FF00FF) << 8)
+        v = ((v >> 16) & 0x0000FFFF0000FFFF) | ((v & 0x0000FFFF0000FFFF) << 16)
+        v = (v >> 32) | (v << 32)
+        return v
     }
 }

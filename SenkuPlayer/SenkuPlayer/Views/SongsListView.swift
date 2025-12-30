@@ -52,19 +52,35 @@ struct SongsListView: View {
                         }
                         .contextMenu {
                             Button {
-                                shareTarget = ShareTarget(songs: [song])
+                                player.playNext(song)
                             } label: {
-                                Label("Share Nearby", systemImage: "wave.3.backward.circle")
+                                Label("Play Next", systemImage: "text.line.first.and.arrowtriangle.forward")
                             }
                             
-                            if !isSelectionMode {
-                                Button {
-                                    toggleSelection(song.id)
-                                    isSelectionMode = true
-                                } label: {
-                                    Label("Select", systemImage: "checkmark.circle")
-                                }
+                            Button {
+                                player.playLater(song)
+                            } label: {
+                                Label("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward")
                             }
+                            
+                            Divider()
+                            
+                            Button {
+                                FavoritesManager.shared.toggleFavorite(song: song)
+                            } label: {
+                                let isFav = FavoritesManager.shared.isFavorite(song: song)
+                                Label(isFav ? "Remove from Favorites" : "Favorite", 
+                                      systemImage: isFav ? "heart.slash.fill" : "heart")
+                            }
+                            
+                            Button {
+                                selectedSongs = [song.id]
+                                showingPlaylistPicker = true
+                            } label: {
+                                Label("Add to a Playlist...", systemImage: "music.note.list")
+                            }
+                        } preview: {
+                            SongPreviewView(song: song)
                         }
                     }
                 }
@@ -94,10 +110,20 @@ struct SongsListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingPlaylistPicker) {
+        .sheet(isPresented: $showingPlaylistPicker, onDismiss: {
+            if isSelectionMode {
+                isSelectionMode = false
+                selectedSongs.removeAll()
+            }
+        }) {
             PlaylistPickerView(songIDs: Array(selectedSongs))
         }
-        .sheet(item: $shareTarget) { target in
+        .sheet(item: $shareTarget, onDismiss: {
+            if isSelectionMode {
+                isSelectionMode = false
+                selectedSongs.removeAll()
+            }
+        }) { target in
             NavigationStack {
                 NearbyShareView(songs: target.songs)
             }
@@ -209,6 +235,54 @@ struct SongRow: View {
         let minutes = Int(duration) / 60
         let seconds = Int(duration) % 60
         return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
+
+// MARK: - Song Preview View
+struct SongPreviewView: View {
+    let song: Song
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let artworkData = song.artworkData,
+               let platformImage = PlatformImage.fromData(artworkData) {
+                Image(platformImage: platformImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 250, height: 250)
+                    .cornerRadius(12)
+            } else {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.gray.opacity(0.1))
+                    .frame(width: 250, height: 250)
+                    .overlay {
+                        Image(systemName: "music.note")
+                            .font(.system(size: 60))
+                            .foregroundColor(.gray)
+                    }
+            }
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(song.title)
+                    .font(.headline)
+                    .lineLimit(1)
+                
+                Text(song.artist)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                
+                Text(song.album)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            .padding(.horizontal, 4)
+            .padding(.bottom, 8)
+        }
+        .padding(16)
+        .background(Color(platformColor: .secondaryBackground))
     }
 }
 

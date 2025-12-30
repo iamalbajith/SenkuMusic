@@ -260,6 +260,22 @@ class AudioPlayerManager: NSObject, ObservableObject {
         }
     }
     
+    func playNext(_ song: Song) {
+        if queue.isEmpty {
+            playSong(song, in: [song], at: 0)
+        } else {
+            queue.insert(song, at: min(currentIndex + 1, queue.count))
+        }
+    }
+    
+    func playLater(_ song: Song) {
+        if queue.isEmpty {
+            playSong(song, in: [song], at: 0)
+        } else {
+            queue.append(song)
+        }
+    }
+    
     func playPrevious() {
         guard !queue.isEmpty else { return }
         
