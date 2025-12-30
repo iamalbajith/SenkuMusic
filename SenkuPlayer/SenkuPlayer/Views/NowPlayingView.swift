@@ -201,7 +201,7 @@ struct NowPlayingView: View {
                 }
             )
             .tint(.blue)
-            .onChange(of: player.currentTime) { newValue in
+            .onChange(of: player.currentTime) { oldValue, newValue in
                 if !isDraggingSlider {
                     draggedTime = newValue
                 }

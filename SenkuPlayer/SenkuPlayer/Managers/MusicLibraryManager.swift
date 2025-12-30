@@ -45,7 +45,7 @@ class MusicLibraryManager: ObservableObject {
         isScanning = true
         scanProgress = 0
         
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        DispatchQueue.global(qos: .default).async { [weak self] in
             guard let self = self else { return }
             
             var foundSongs: [Song] = []
@@ -85,7 +85,7 @@ class MusicLibraryManager: ObservableObject {
         isScanning = true
         scanProgress = 0
         
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        DispatchQueue.global(qos: .default).async { [weak self] in
             guard let self = self else { return }
             
             var foundSongs: [Song] = []
@@ -303,7 +303,7 @@ class MusicLibraryManager: ObservableObject {
     }
     
     func loadSavedData() {
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+        DispatchQueue.global(qos: .default).async { [weak self] in
             guard let self = self else { return }
             
             var loadedSongs: [Song] = []
