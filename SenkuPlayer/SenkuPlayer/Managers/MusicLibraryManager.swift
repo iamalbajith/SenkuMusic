@@ -27,9 +27,14 @@ class MusicLibraryManager: ObservableObject {
     
     // MARK: - Initialization
     private init() {
+        // Load partial data immediately for UI skeleton
+        if let data = userDefaults.data(forKey: playlistsKey),
+           let decoded = try? JSONDecoder().decode([Playlist].self, from: data) {
+            self.playlists = decoded
+        }
+        
+        // Heavy lifting on background
         loadSavedData()
-        scanMusicDirectory()
-        organizeLibrary()
     }
     
     // MARK: - Scan Music Directory
@@ -313,20 +318,57 @@ class MusicLibraryManager: ObservableObject {
     }
     
     private func loadSavedData() {
-        // Load song URLs and recreate Song objects
-        if let data = userDefaults.data(forKey: songsKey),
-           let urls = try? JSONDecoder().decode([URL].self, from: data) {
-            // Recreate songs from URLs
-            songs = urls.compactMap { url in
-                guard fileManager.fileExists(atPath: url.path) else { return nil }
-                return Song.fromURL(url)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            // 1. Load song URLs from UserDefaults
+            if let data = self.userDefaults.data(forKey: self.songsKey),
+               let urls = try? JSONDecoder().decode([URL].self, from: data) {
+                
+                let loadedSongs: [Song] = urls.compactMap { url in
+                    guard self.fileManager.fileExists(atPath: url.path) else { return nil }
+                    return Song.fromURL(url)
+                }
+                
+                DispatchQueue.main.async {
+                    self.songs = loadedSongs
+                    self.organizeLibrary()
+                }
+            }
+            
+            // 2. Scan Music directory for NEW files
+            self.scanMusicDirectoryAsync()
+        }
+    }
+    
+    private func scanMusicDirectoryAsync() {
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let musicDirectory = documentsURL.appendingPathComponent("Music", isDirectory: true)
+        
+        if !fileManager.fileExists(atPath: musicDirectory.path) {
+            try? fileManager.createDirectory(at: musicDirectory, withIntermediateDirectories: true)
+            return
+        }
+        
+        guard let files = try? fileManager.contentsOfDirectory(at: musicDirectory, includingPropertiesForKeys: nil) else { return }
+        let mp3Files = files.filter { $0.pathExtension.lowercased() == "mp3" }
+        
+        var newSongs: [Song] = []
+        for fileURL in mp3Files {
+            // Use stable ID to check for duplicates
+            if !self.songs.contains(where: { $0.url.lastPathComponent == fileURL.lastPathComponent }) {
+                if let song = Song.fromURL(fileURL) {
+                    newSongs.append(song)
+                }
             }
         }
         
-        // Load playlists
-        if let data = userDefaults.data(forKey: playlistsKey),
-           let decoded = try? JSONDecoder().decode([Playlist].self, from: data) {
-            playlists = decoded
+        if !newSongs.isEmpty {
+            DispatchQueue.main.async {
+                self.songs.append(contentsOf: newSongs)
+                self.organizeLibrary()
+                self.saveSongs()
+            }
         }
     }
     

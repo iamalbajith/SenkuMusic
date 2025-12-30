@@ -96,6 +96,15 @@ iOS will prompt for **Local Network** access the first time you use Nearby Share
 3. **From Player**: Tap the Share (Wave) icon in the Now Playing screen.
 4. The receiver must also be in the "Nearby" tab for discovery to work.
 
+## 🐛 Known Issues (Work in Progress)
+
+We are currently tracking a few high-priority items related to playlist and data consistency:
+- **Sync Latency**: Playlist song counts and Favorites status might sometimes show as 0 on the Library view immediately after app launch while the background scanner is initializing.
+- **Playback Handover**: Starting playback directly from a playlist detail view can occasionally fail if the underlying song metadata hasn't been fully resolved by the engine.
+- **Data Refresh**: In some cases, adding a song to a playlist requires navigating back and forth for the count to refresh in the main list.
+
+*These issues are being actively addressed in the upcoming v1.4.0 update.*
+
 ## 📝 Troubleshooting
 
 - **Mac can't find iPhone**: Ensure both devices have Wi-Fi and Bluetooth ON. Check if the Mac Firewall or a VPN is blocking local connections.

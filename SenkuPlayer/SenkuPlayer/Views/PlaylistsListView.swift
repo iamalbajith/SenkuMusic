@@ -38,8 +38,8 @@ struct PlaylistsListView: View {
                     }
                     
                     ForEach(filteredPlaylists) { playlist in
-                        NavigationLink(destination: PlaylistDetailView(playlist: playlist)) {
-                            PlaylistRow(playlist: playlist)
+                        NavigationLink(destination: PlaylistDetailView(playlistID: playlist.id)) {
+                            PlaylistRow(playlistID: playlist.id)
                         }
                     }
                     .onDelete(perform: deletePlaylists)
@@ -245,10 +245,15 @@ struct FavoritesDetailView: View {
 
 struct PlaylistRow: View {
     @StateObject private var library = MusicLibraryManager.shared
-    let playlist: Playlist
+    let playlistID: UUID
+    
+    private var playlist: Playlist? {
+        library.playlists.first { $0.id == playlistID }
+    }
     
     private var songs: [Song] {
-        library.getSongsForPlaylist(playlist)
+        guard let playlist = playlist else { return [] }
+        return library.getSongsForPlaylist(playlist)
     }
     
     var body: some View {
@@ -258,7 +263,7 @@ struct PlaylistRow: View {
                 .cornerRadius(8)
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(playlist.name)
+                Text(playlist?.name ?? "Unknown Playlist")
                     .font(.body)
                     .fontWeight(.medium)
                 
@@ -354,11 +359,16 @@ struct PlaylistArtwork: View {
 struct PlaylistDetailView: View {
     @StateObject private var library = MusicLibraryManager.shared
     @StateObject private var player = AudioPlayerManager.shared
-    @State var playlist: Playlist
+    let playlistID: UUID
     @Environment(\.dismiss) private var dismiss
     
+    private var playlist: Playlist? {
+        library.playlists.first { $0.id == playlistID }
+    }
+    
     private var songs: [Song] {
-        library.getSongsForPlaylist(playlist)
+        guard let playlist = playlist else { return [] }
+        return library.getSongsForPlaylist(playlist)
     }
     
     var body: some View {
@@ -369,7 +379,7 @@ struct PlaylistDetailView: View {
                     .cornerRadius(16)
                     .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 6)
                 
-                Text(playlist.name)
+                Text(playlist?.name ?? "Playlist")
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -444,16 +454,18 @@ struct PlaylistDetailView: View {
     }
     
     private func deleteSongs(at offsets: IndexSet) {
+        guard var updatedPlaylist = playlist else { return }
         for index in offsets {
             let song = songs[index]
-            playlist.removeSong(song.id)
+            updatedPlaylist.removeSong(song.id)
         }
-        library.updatePlaylist(playlist)
+        library.updatePlaylist(updatedPlaylist)
     }
     
     private func moveSongs(from source: IndexSet, to destination: Int) {
-        playlist.moveSong(from: source, to: destination)
-        library.updatePlaylist(playlist)
+        guard var updatedPlaylist = playlist else { return }
+        updatedPlaylist.moveSong(from: source, to: destination)
+        library.updatePlaylist(updatedPlaylist)
     }
 }
 
