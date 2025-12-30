@@ -54,10 +54,10 @@ struct PlatformUtils {
         #if os(macOS)
         return NSScreen.main?.frame.width ?? 800
         #else
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            return windowScene.screen.bounds.width
-        }
-        return UIScreen.main.bounds.width
+        let windowScene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first
+        return windowScene?.screen.bounds.width ?? 375
         #endif
     }
     
@@ -65,10 +65,10 @@ struct PlatformUtils {
         #if os(macOS)
         return NSScreen.main?.frame.height ?? 600
         #else
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-            return windowScene.screen.bounds.height
-        }
-        return UIScreen.main.bounds.height
+        let windowScene = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first
+        return windowScene?.screen.bounds.height ?? 812
         #endif
     }
 }
