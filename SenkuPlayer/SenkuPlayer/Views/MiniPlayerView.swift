@@ -63,6 +63,16 @@ struct MiniPlayerView: View {
                     
                     Spacer()
                     
+                    // Previous Button
+                    Button {
+                        player.playPrevious()
+                    } label: {
+                        Image(systemName: "backward.fill")
+                            .font(.body)
+                            .foregroundColor(.primary)
+                            .frame(width: 44, height: 44)
+                    }
+
                     // Play/Pause Button
                     Button {
                         player.togglePlayPause()
@@ -85,16 +95,21 @@ struct MiniPlayerView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(Color(.systemGray6))
+                .background(.ultraThinMaterial)
                 .contentShape(Rectangle())
                 .onTapGesture {
                     showingNowPlaying = true
                 }
+
             }
             .transition(.move(edge: .bottom).combined(with: .opacity))
             .sheet(isPresented: $showingNowPlaying) {
                 NowPlayingView()
             }
+            .cornerRadius(35)
+            .shadow(color: .black.opacity(0.15), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 60) // Float above TabBar
         }
     }
 }

@@ -18,8 +18,31 @@ struct ContentView: View {
                 Color.black.ignoresSafeArea()
             }
             
-            // Main Library View
-            LibraryView()
+            // Main Tab View
+            TabView {
+                LibraryView()
+                    .tabItem {
+                        Label("Home", systemImage: "house")
+                    }
+                
+                PlaylistsListView(searchText: "")
+                    .tabItem {
+                        Label("Playlists", systemImage: "music.note.list")
+                    }
+                
+                NavigationStack {
+                    NearbyShareView(song: nil)
+                }
+                .tabItem {
+                    Label("Nearby", systemImage: "wave.3.backward.circle.fill")
+                }
+                
+                SettingsView()
+                    .tabItem {
+                        Label("Settings", systemImage: "gear")
+                    }
+            }
+            .tint(.blue)
             
             // Mini Player Overlay
             if player.currentSong != nil {

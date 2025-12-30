@@ -41,21 +41,31 @@ struct ArtistRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Artist Avatar
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
+            if let firstSong = artist.songs.first,
+               let artworkData = firstSong.artworkData,
+               let uiImage = UIImage(data: artworkData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+            } else {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
                     )
-                )
-                .frame(width: 50, height: 50)
-                .overlay {
-                    Text(artist.name.prefix(1).uppercased())
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
-                }
+                    .frame(width: 50, height: 50)
+                    .overlay {
+                        Text(artist.name.prefix(1).uppercased())
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                    }
+            }
             
             // Artist Info
             VStack(alignment: .leading, spacing: 4) {
@@ -84,22 +94,33 @@ struct ArtistDetailView: View {
                 // Header
                 VStack(spacing: 16) {
                     // Artist Avatar
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
+                    if let firstSong = artist.songs.first,
+                       let artworkData = firstSong.artworkData,
+                       let uiImage = UIImage(data: artworkData) {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 120, height: 120)
+                            .clipShape(Circle())
+                            .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 6)
+                    } else {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.blue.opacity(0.6), Color.purple.opacity(0.6)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
                             )
-                        )
-                        .frame(width: 120, height: 120)
-                        .overlay {
-                            Text(artist.name.prefix(1).uppercased())
-                                .font(.system(size: 50))
-                                .fontWeight(.bold)
-                                .foregroundColor(.white)
-                        }
-                        .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 6)
+                            .frame(width: 120, height: 120)
+                            .overlay {
+                                Text(artist.name.prefix(1).uppercased())
+                                    .font(.system(size: 50))
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                            }
+                            .shadow(color: .black.opacity(0.2), radius: 12, x: 0, y: 6)
+                    }
                     
                     // Artist Name
                     Text(artist.name)

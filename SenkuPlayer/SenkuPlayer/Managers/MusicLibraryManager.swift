@@ -291,6 +291,12 @@ class MusicLibraryManager: ObservableObject {
         }
     }
     
+    // MARK: - Helper
+    func loadMusicFiles() {
+        scanMusicDirectory()
+        organizeLibrary()
+    }
+
     // MARK: - Persistence
     private func saveSongs() {
         // Only save URLs, not full Song objects (to avoid UserDefaults size limit)

@@ -78,7 +78,9 @@ struct SongsListView: View {
             PlaylistPickerView(songIDs: Array(selectedSongs))
         }
         .sheet(item: $songToShare) { song in
-            NearbyShareView(song: song)
+            NavigationStack {
+                NearbyShareView(song: song)
+            }
         }
     }
     

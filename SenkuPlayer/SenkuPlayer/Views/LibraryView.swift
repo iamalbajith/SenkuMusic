@@ -11,7 +11,6 @@ struct LibraryView: View {
     @StateObject private var library = MusicLibraryManager.shared
     @State private var selectedTab = 0
     @State private var searchText = ""
-    @State private var showingSettings = false
     @State private var showingFilePicker = false
     
     var body: some View {
@@ -27,7 +26,6 @@ struct LibraryView: View {
                     Text("Songs").tag(0)
                     Text("Artists").tag(1)
                     Text("Albums").tag(2)
-                    Text("Playlists").tag(3)
                 }
                 .pickerStyle(.segmented)
                 .padding()
@@ -51,18 +49,6 @@ struct LibraryView: View {
                             .foregroundColor(.blue)
                     }
                 }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingSettings = true
-                    } label: {
-                        Image(systemName: "gear")
-                            .foregroundColor(.primary)
-                    }
-                }
-            }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
             }
             .sheet(isPresented: $showingFilePicker) {
                 DocumentPicker { urls in
@@ -81,8 +67,6 @@ struct LibraryView: View {
             ArtistsListView(searchText: searchText)
         case 2:
             AlbumsListView(searchText: searchText)
-        case 3:
-            PlaylistsListView(searchText: searchText)
         default:
             EmptyView()
         }

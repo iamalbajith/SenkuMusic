@@ -40,13 +40,25 @@ class MultipeerManager: NSObject, ObservableObject {
     }
     
     func startBrowsing() {
-        serviceBrowser.startBrowsingForPeers()
-        serviceAdvertiser.startAdvertisingPeer()
+        if isDiscoverable {
+            serviceBrowser.startBrowsingForPeers()
+            serviceAdvertiser.startAdvertisingPeer()
+        }
     }
     
     func stopBrowsing() {
         serviceBrowser.stopBrowsingForPeers()
         serviceAdvertiser.stopAdvertisingPeer()
+    }
+
+    @Published var isDiscoverable: Bool = true {
+        didSet {
+            if isDiscoverable {
+                startBrowsing()
+            } else {
+                stopBrowsing()
+            }
+        }
     }
     
     func invite(peer: MCPeerID) {
@@ -96,12 +108,7 @@ extension MultipeerManager: MCSessionDelegate {
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
         DispatchQueue.main.async {
             self.isReceiving = true
-            // Observe progress if needed
-            progress.cancellationHandler = {
-                DispatchQueue.main.async {
-                    self.isReceiving = false
-                }
-            }
+            print("Started receiving: \(resourceName) from \(peerID.displayName)")
         }
     }
     
@@ -114,12 +121,24 @@ extension MultipeerManager: MCSessionDelegate {
                 return
             }
             
-            guard let localURL = localURL else { return }
+            guard let localURL = localURL else {
+                print("Error: localURL is nil for \(resourceName)")
+                return
+            }
             
-            // Move file to Documents directory
+            print("File received at temp path: \(localURL.path)")
+            
+            // Move file to Documents/Music directory
             do {
                 let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                let destinationURL = documentsPath.appendingPathComponent(resourceName)
+                let musicDirectory = documentsPath.appendingPathComponent("Music", isDirectory: true)
+                
+                // Ensure Music directory exists
+                if !FileManager.default.fileExists(atPath: musicDirectory.path) {
+                    try FileManager.default.createDirectory(at: musicDirectory, withIntermediateDirectories: true)
+                }
+                
+                let destinationURL = musicDirectory.appendingPathComponent(resourceName)
                 
                 // Remove existing file if needed
                 if FileManager.default.fileExists(atPath: destinationURL.path) {
@@ -127,6 +146,8 @@ extension MultipeerManager: MCSessionDelegate {
                 }
                 
                 try FileManager.default.moveItem(at: localURL, to: destinationURL)
+                print("Moved file to: \(destinationURL.path)")
+                
                 self.receivedSongURL = destinationURL
                 
                 // Refresh library
