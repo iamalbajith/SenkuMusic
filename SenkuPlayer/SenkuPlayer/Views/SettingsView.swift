@@ -213,10 +213,7 @@ struct SettingsView: View {
     }
     
     private func clearLibrary() {
-        library.songs.removeAll()
-        library.albums.removeAll()
-        library.artists.removeAll()
-        UserDefaults.standard.removeObject(forKey: "savedSongs")
+        library.deleteAllSongs()
     }
     
     private func handleVersionTap() {

@@ -194,6 +194,33 @@ class MusicLibraryManager: ObservableObject {
         savePlaylists()
     }
     
+    func deleteAllSongs() {
+        // 1. Clear memory
+        songs.removeAll()
+        albums.removeAll()
+        artists.removeAll()
+        
+        // 2. Clear UserDefaults
+        userDefaults.removeObject(forKey: songsKey)
+        
+        // 3. Delete physical files
+        guard let documentsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else { return }
+        let musicDirectory = documentsURL.appendingPathComponent("Music", isDirectory: true)
+        
+        if fileManager.fileExists(atPath: musicDirectory.path) {
+            do {
+                let files = try fileManager.contentsOfDirectory(at: musicDirectory, includingPropertiesForKeys: nil)
+                for file in files {
+                    try fileManager.removeItem(at: file)
+                }
+                debugLog("Successfully deleted all physical music files")
+            } catch {
+                print("Failed to delete physical files: \(error)")
+            }
+        }
+    }
+
+    
     // MARK: - Library Organization
     private func organizeLibrary() {
         removeDuplicateSongs()
