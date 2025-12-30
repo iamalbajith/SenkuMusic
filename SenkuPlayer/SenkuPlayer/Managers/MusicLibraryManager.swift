@@ -176,8 +176,21 @@ class MusicLibraryManager: ObservableObject {
     
     // MARK: - Library Organization
     private func organizeLibrary() {
+        removeDuplicateSongs()
         organizeAlbums()
         organizeArtists()
+    }
+    
+    private func removeDuplicateSongs() {
+        var seenIDs = Set<UUID>()
+        songs = songs.filter { (song: Song) -> Bool in
+            if seenIDs.contains(song.id) {
+                return false
+            } else {
+                seenIDs.insert(song.id)
+                return true
+            }
+        }
     }
     
     private func organizeAlbums() {
