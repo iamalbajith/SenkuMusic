@@ -202,7 +202,7 @@ struct SettingsView: View {
                             Text("Version")
                                 .foregroundColor(.primary)
                             Spacer()
-                            Text("1.4.0")
+                            Text("1.5.0")
                                 .foregroundColor(.secondary)
                         }
                     }
@@ -211,7 +211,7 @@ struct SettingsView: View {
                     HStack {
                         Text("Build")
                         Spacer()
-                        Text("21")
+                        Text("22")
                             .foregroundColor(.secondary)
                     }
                 } header: {
