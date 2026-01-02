@@ -71,7 +71,7 @@ struct NearbyShareView: View {
                 Spacer()
                 Text("No devices found")
                     .foregroundColor(.secondary)
-                Text("Make sure your other device has SenkuPlayer open")
+                Text("Make sure your other device has Aura open")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 Spacer()

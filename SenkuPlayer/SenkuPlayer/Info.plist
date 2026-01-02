@@ -6,8 +6,10 @@
 	<array>
 		<string>audio</string>
 	</array>
+	<key>CFBundleDisplayName</key>
+	<string>Aura</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>SenkuPlayer needs access to the local network to share songs with nearby friends.</string>
+	<string>Aura needs access to the local network to share songs with nearby friends.</string>
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_senku-share._tcp</string>
